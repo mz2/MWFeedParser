@@ -35,11 +35,7 @@
 #pragma mark - Instance Methods
 
 - (NSString *)stringByConvertingHTMLToPlainText {
-	
-	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	// Character sets
+    // Character sets
 	NSCharacterSet *stopCharacters = [NSCharacterSet characterSetWithCharactersInString:[NSString stringWithFormat:@"< \t\n\r%C%C%C%C", 0x0085, 0x000C, 0x2028, 0x2029]];
 	NSCharacterSet *newLineAndWhitespaceCharacters = [NSCharacterSet characterSetWithCharactersInString:[NSString stringWithFormat:@" \t\n\r%C%C%C%C", 0x0085, 0x000C, 0x2028, 0x2029]];
 	NSCharacterSet *tagNameCharacters = [NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"];
@@ -114,19 +110,10 @@
 		
 	} while (![scanner isAtEnd]);
 	
-	// Cleanup
-	[scanner release];
-	
 	// Decode HTML entities and return
-	NSString *retString = [[result stringByDecodingHTMLEntities] retain];
-	[result release];
+	NSString *retString = [result stringByDecodingHTMLEntities];
 	
-	// Drain
-	[pool drain];
-	
-	// Return
-	return [retString autorelease];
-	
+    return retString;
 }
 
 - (NSString *)stringByDecodingHTMLEntities {
@@ -146,10 +133,6 @@
 }
 
 - (NSString *)stringWithNewLinesAsBRs {
-	
-	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
 	// Strange New lines:
 	//	Next Line, U+0085
 	//	Form Feed, U+000C
@@ -191,24 +174,12 @@
 		
 	} while (![scanner isAtEnd]);
 	
-	// Cleanup & return
-	[scanner release];
-	NSString *retString = [[NSString stringWithString:result] retain];
-	[result release];
-	
-	// Drain
-	[pool drain];
-	
-	// Return
-	return [retString autorelease];
-	
+	NSString *retString = [NSString stringWithString:result];
+
+	return retString;
 }
 
 - (NSString *)stringByRemovingNewLinesAndWhitespace {
-	
-	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
 	// Strange New lines:
 	//	Next Line, U+0085
 	//	Form Feed, U+000C
@@ -238,36 +209,22 @@
 		
 	}
 	
-	// Cleanup
-	[scanner release];
-	
 	// Return
-	NSString *retString = [[NSString stringWithString:result] retain];
-	[result release];
-	
-	// Drain
-	[pool drain];
-	
-	// Return
-	return [retString autorelease];
-	
+	NSString *retString = [NSString stringWithString:result];
+
+	return retString;
 }
 
 - (NSString *)stringByLinkifyingURLs {
     if (!NSClassFromString(@"NSRegularExpression")) return self;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSString *pattern = @"(?<!=\")\\b((http|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%%&amp;:/~\\+#]*[\\w\\-\\@?^=%%&amp;/~\\+#])?)";
+	NSString *pattern = @"(?<!=\")\\b((http|https):\\/\\/[\\w\\-_]+(\\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%%&amp;:/~\\+#]*[\\w\\-\\@?^=%%&amp;/~\\+#])?)";
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil];
-    NSString *modifiedString = [[regex stringByReplacingMatchesInString:self options:0 range:NSMakeRange(0, [self length])
-                                                           withTemplate:@"<a href=\"$1\" class=\"linkified\">$1</a>"] retain];
-    [pool drain];
-    return [modifiedString autorelease];
+    NSString *modifiedString = [regex stringByReplacingMatchesInString:self options:0 range:NSMakeRange(0, [self length])
+                                                           withTemplate:@"<a href=\"$1\" class=\"linkified\">$1</a>"];
+    return modifiedString;
 }
 
 - (NSString *)stringByStrippingTags {
-	
-	// Pool
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	// Find first & and short-cut if we can
 	NSUInteger ampIndex = [self rangeOfString:@"<" options:NSLiteralSearch].location;
@@ -291,7 +248,6 @@
 		if (tag) {
 			NSString *t = [[NSString alloc] initWithFormat:@"%@>", tag];
 			[tags addObject:t];
-			[t release];
 		}
 		
 	} while (![scanner isAtEnd]);
@@ -325,18 +281,10 @@
 	}
 	
 	// Remove multi-spaces and line breaks
-	finalString = [[result stringByRemovingNewLinesAndWhitespace] retain];
-	
-	// Cleanup
-	[result release];
-	[tags release];
-	
-	// Drain
-	[pool drain];
+	finalString = [result stringByRemovingNewLinesAndWhitespace];
 	
 	// Return
-    return [finalString autorelease];
-	
+    return finalString;
 }
 
 @end
